@@ -1,0 +1,58 @@
+import pandas 
+import json
+import matplotlib.pyplot as plt # for plotting
+
+df_list = [] # this is a list of dataframes to be combined to a whole
+num_iphone_list = [] # this is a list that stores the number of unique iphone users on each day
+num_android_list = [] # this is a list that stores the number of unique android users on each day
+
+for i in range(1,9): # I have 8 files to parse in total  
+# inside this loop, we get the number of iphone vs. android users on each day,
+    # and append the results to the num_iphone/android_list,
+# for i in [5]: # I have 8 files to parse in total
+    filename = '2017-11-0'+str(i)+'.json' # to parse the filenames
+    print(filename)
+    with open(filename, encoding='utf-8') as f:
+        data = json.load(f)
+    df = pandas.DataFrame(data) # json file to pandas dataframe
+    df_list.append(df) # append this current dataframe to df_list
+
+    iphones = df[df["source"] == "Twitter for iPhone"]
+    iphones_unique_list = iphones.user_id.unique().tolist()
+    num_iphone = len(iphones_unique_list)
+    num_iphone_list.append(num_iphone) 
+    # append the current number of iphone users
+    # to the whole list of 8 days
+
+    android = df[df["source"] == "Twitter for Android"]
+    android_unique_list = android.user_id.unique().tolist()
+    num_android = len(android_unique_list)
+    num_android_list.append(num_android) 
+
+# Here, I join the 8 dataframes from all 8 days, and we get the number of
+    # unique iphone and android users on the whole period of 8 days
+df = pandas.concat(df_list) # joining all the dataframes from all 8 days
+
+iphones = df[df["source"] == "Twitter for iPhone"]
+iphones_unique_list = iphones.user_id.unique().tolist()
+num_iphone = len(iphones_unique_list)
+
+android = df[df["source"] == "Twitter for Android"]
+android_unique_list = android.user_id.unique().tolist()
+num_android = len(android_unique_list)
+
+# Here, I generate a bar plot of iphone vs. android on all 8 days
+data_toplot = [num_iphone, num_android]
+plt.bar([0,1], data_toplot)
+plt.xlabel('type')
+plt.ylabel('unique ids')
+plt.xticks([0,1],['iphone','android'])
+plt.title('iphone vs. android for all 8 days')
+plt.show()
+
+# Here, I generate a plot for each day
+plt.plot(list(range(1,9)), num_iphone_list) # (1,9)
+plt.plot(list(range(1,9)), num_android_list) # (1,9)
+plt.legend(['iphone','android'])
+plt.title('iphone vs. android for each day')
+plt.show()
